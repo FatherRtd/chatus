@@ -1,0 +1,43 @@
+version: "3.9"
+
+networks:
+    chatus-dev:
+        driver: bridge
+        
+services:
+    api:
+        container_name: chatus-api
+        environment: 
+            - ConnectionStrings__ChatDbContext=Host=postgres;Port=5432;Database=chatus;Username=postgres;Password=postgres
+            - JwtOptions__SecretKey=qweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqweqwe
+            - JwtOptions__Audience=audience
+            - JwtOptions__Issuer=issuer
+            - JwtOptions__ExpiresHours=12
+        build:
+            context: .
+            dockerfile: chatus/Dockerfile
+        ports:
+            - "5000:8080"
+        networks: 
+            - chatus-dev
+        depends_on:
+            - postgres_db
+
+    postgres_db:
+        container_name: postgres
+        image: postgres:latest
+        environment: 
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: chatus
+        ports:
+            - "5432:5432"
+        networks:
+            - chatus-dev
+        volumes:
+            - postgres-data:/var/lib/postgres/data
+
+volumes:
+    postgres-data:
+    
+  
