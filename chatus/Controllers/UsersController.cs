@@ -23,13 +23,38 @@ namespace chatus.API.Controllers
         public async Task<IResult> GetById(Guid id)
         {
             var result = await _userService.GetById(id);
-            return Results.Ok(result.Adapt<UserDto>());
+            if (result.IsFailure)
+            {
+                return Results.Problem(new ProblemDetails
+                {
+                    Status = 400,
+                    Detail = result.Error,
+                });
+            }
+
+            return Results.Ok(result.Value.Adapt<UserDto>());
+        }
+
+        [HttpGet(nameof(TestError))]
+        public IResult TestError()
+        {
+            return Results.Problem("error");
         }
 
         [HttpPost(nameof(Register))]
         public async Task<IResult> Register(RegisterUserRequest request)
         {
-            await _userService.Register(request.Login, request.Password, request.UserName);
+            var result = await _userService.Register(request.Login, request.Password, request.UserName);
+
+            if (result.IsFailure)
+            {
+                return Results.Problem(new ProblemDetails
+                {
+                    Status = 400,
+                    Detail = result.Error
+                });
+            }
+
             return Results.Ok();
         }
 
@@ -38,9 +63,18 @@ namespace chatus.API.Controllers
         {
             var token = await _userService.Login(request.Login, request.Password);
 
-            Response.Cookies.Append("woop-woop", token);
+            if (token.IsFailure)
+            {
+                return Results.Problem(new ProblemDetails
+                {
+                    Status = 400,
+                    Detail = token.Error
+                });
+            }
 
-            return Results.Ok(token);
+            Response.Cookies.Append("woop-woop", token.Value);
+
+            return Results.Ok(token.Value);
         }
     }
 }

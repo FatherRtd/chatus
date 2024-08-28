@@ -2,6 +2,7 @@
 using chatus.API.Entities.Repositories;
 using chatus.API.Models;
 using chatus.API.Utils;
+using CSharpFunctionalExtensions;
 
 namespace chatus.API.Services
 {
@@ -18,13 +19,27 @@ namespace chatus.API.Services
             _jwtProvider = jwtProvider;
         }
 
-        public async Task<User> GetById(Guid id)
+        public async Task<Result<User>> GetById(Guid id)
         {
-            return await _userRepository.GetById(id);
+            var user = await _userRepository.GetById(id);
+
+            if (user == null)
+            {
+                return Result.Failure<User>($"Пользователь с id = {id} не найден");
+            }
+
+            return user;
         }
 
-        public async Task Register(string login, string password, string userName)
+        public async Task<Result> Register(string login, string password, string userName)
         {
+            var user = await _userRepository.GetByLogin(login);
+
+            if (user != null)
+            {
+                return Result.Failure("Пользователь с таким логином уже существует");
+            }
+
             var hashedPassword = _passwordHasher.Generate(password);
 
             var newUser = new User
@@ -36,17 +51,24 @@ namespace chatus.API.Services
             };
 
             await _userRepository.Add(newUser);
+
+            return Result.Success();
         }
 
-        public async Task<string> Login(string login, string password)
+        public async Task<Result<string>> Login(string login, string password)
         {
             var user = await _userRepository.GetByLogin(login);
+
+            if (user == null)
+            {
+                return Result.Failure<string>("Неверный логин или пароль");
+            }
 
             var result = _passwordHasher.Verify(password, user.Password);
 
             if (result == false)
             {
-                throw new Exception("Wrong login or password");
+                return Result.Failure<string>("Неверный логин или пароль");
             }
 
             var token = _jwtProvider.GenerateToken(user);
