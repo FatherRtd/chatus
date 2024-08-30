@@ -1,8 +1,12 @@
 ﻿using chatus.API.Contracts;
+using chatus.API.Dto;
 using chatus.API.Entities.Repositories;
+using chatus.API.Errors;
+using chatus.API.Errors.User;
 using chatus.API.Models;
 using chatus.API.Utils;
 using CSharpFunctionalExtensions;
+using Mapster;
 
 namespace chatus.API.Services
 {
@@ -19,25 +23,25 @@ namespace chatus.API.Services
             _jwtProvider = jwtProvider;
         }
 
-        public async Task<Result<User>> GetById(Guid id)
+        public async Task<Result<UserDto, Error>> GetById(Guid id)
         {
             var user = await _userRepository.GetById(id);
 
             if (user == null)
             {
-                return Result.Failure<User>($"Пользователь с id = {id} не найден");
+                return UserErrors.MissingId(id);
             }
 
-            return user;
+            return user.Adapt<UserDto>();
         }
 
-        public async Task<Result> Register(string login, string password, string userName)
+        public async Task<UnitResult<Error>> Register(string login, string password, string userName)
         {
             var user = await _userRepository.GetByLogin(login);
 
             if (user != null)
             {
-                return Result.Failure("Пользователь с таким логином уже существует");
+                return UserErrors.LoginExists;
             }
 
             var hashedPassword = _passwordHasher.Generate(password);
@@ -52,23 +56,23 @@ namespace chatus.API.Services
 
             await _userRepository.Add(newUser);
 
-            return Result.Success();
+            return UnitResult.Success<Error>();
         }
 
-        public async Task<Result<string>> Login(string login, string password)
+        public async Task<Result<string, Error>> Login(string login, string password)
         {
             var user = await _userRepository.GetByLogin(login);
 
             if (user == null)
             {
-                return Result.Failure<string>("Неверный логин или пароль");
+                return UserErrors.WrongLoginOrPassword;
             }
 
             var result = _passwordHasher.Verify(password, user.Password);
 
             if (result == false)
             {
-                return Result.Failure<string>("Неверный логин или пароль");
+                return UserErrors.WrongLoginOrPassword;
             }
 
             var token = _jwtProvider.GenerateToken(user);

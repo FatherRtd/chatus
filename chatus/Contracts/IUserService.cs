@@ -1,12 +1,13 @@
-﻿using chatus.API.Models;
+﻿using chatus.API.Dto;
+using chatus.API.Errors;
 using CSharpFunctionalExtensions;
 
 namespace chatus.API.Contracts
 {
     public interface IUserService
     {
-        Task<Result> Register(string login, string password, string userName);
-        Task<Result<string>> Login(string login, string password);
-        Task<Result<User>> GetById(Guid id);
+        Task<UnitResult<Error>> Register(string login, string password, string userName);
+        Task<Result<string, Error>> Login(string login, string password);
+        Task<Result<UserDto, Error>> GetById(Guid id);
     }
 }
