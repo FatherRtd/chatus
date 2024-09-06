@@ -2,7 +2,7 @@
 using chatus.API.Errors;
 using CSharpFunctionalExtensions;
 
-namespace chatus.API.Contracts
+namespace chatus.API.Services
 {
     public interface IUserService
     {

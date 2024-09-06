@@ -9,6 +9,9 @@ public class ChatConfiguration : IEntityTypeConfiguration<ChatEntity>
     {
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.Type)
+               .HasConversion<int>();
+
         builder.HasMany(x => x.Users)
                .WithMany(x => x.Chats);
 

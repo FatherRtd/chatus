@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace chatus.API.Models
+namespace chatus.API.Models.Requests
 {
     public record RegisterUserRequest(
         [Required] string Login,

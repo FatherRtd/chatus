@@ -38,8 +38,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsProduction())
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
     db.Database.Migrate();
 }

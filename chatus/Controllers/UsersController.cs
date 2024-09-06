@@ -1,5 +1,5 @@
-﻿using chatus.API.Contracts;
-using chatus.API.Models;
+﻿using chatus.API.Models.Requests;
+using chatus.API.Services;
 using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

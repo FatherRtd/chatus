@@ -1,5 +1,4 @@
-﻿using chatus.API.Contracts;
-using chatus.API.Dto;
+﻿using chatus.API.Dto;
 using chatus.API.Entities.Repositories;
 using chatus.API.Errors;
 using chatus.API.Errors.User;
